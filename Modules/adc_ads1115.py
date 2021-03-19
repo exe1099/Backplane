@@ -36,7 +36,7 @@ class ADC:
             raise Exception("Address wrong length.")
         return int(hex, 16)
 
-    def set_gain(self, gain):
+    def set_gain(self, gain, verbose=False):
         """Set gain of ADC.
 
         Args:
@@ -47,7 +47,8 @@ class ADC:
                    4 = +/-1.024V
                    8 = +/-0.512V
                   16 = +/-0.256V
-                    (Vcc must be > AIN)
+                  (Vcc must be > AIN)
+            verbose (bool): Verbose output.
         """
         if gain in self.gain_limits:
             self.gain = gain
@@ -55,7 +56,9 @@ class ADC:
             print(
                 "Gain has to be 2/3 = +/-6.144V \n 1 = +/-4.096V \n 2 = +/-2.048V \n 4 = +/-1.024V \n 8 = +/-0.512V \n 16 = +/-0.256V"
             )
-        self.get_gain()
+
+        if verbose:
+            self.get_gain()
     
     def get_gain(self):
         """Print gain of ADC with voltage limits.
@@ -69,11 +72,10 @@ class ADC:
                    8 = +/-0.512V
                   16 = +/-0.256V
         """
-
         print(f"Gain set to {self.gain}.")
         print(f"Limits: +/- {self.gain_limits[self.gain]}")
 
-    def get_channels(self, channels=[1], voltages: bool = True):
+    def get_channels(self, channels=[0, 1, 2, 3], voltages: bool = True):
         """Read channels.
 
         Args:
@@ -101,45 +103,39 @@ class ADCS:
         """
         self.adcs = adcs
 
-    def get_channels(self, n_channels, interval: float = 0, voltages: bool = True):
-        """Read channels.
+    def get_channels(self, interval: float = 0, voltages: bool = True):
+        """Read all channels of both ADCs.
 
         Args:
-            channels (list of list of int): List of list of channels for each ADC.
             interval (float): Continous read with interval seconds between reads. 0 for single read.
             voltages (bool): True to get voltages, False to get number of bins.
 
         Returns:
         """
-        print("|" + " | ".join([f"ADC {adc.device_address:()}" for adc in self.adcs]) + "|")
+        unit = "Volt" if voltages else "Bins"
+        print("-" * 97)
+        print(f"|                    ADC {self.adcs[0].device_address} [{unit}]              |                    ADC {self.adcs[1].device_address} [{unit}]              |")
+        print("-" * 97)
+        print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+        print("-" * 97)
 
-        for channels in n_channels:
-            # print("|" + " | ".join([f"Channel {i}" for i in channels]) + "|", end="")
-            print("| " + " | ".join([f"{i:6}" for i in channels]) + " |", end="")
-        print("")
-        print("-" * (len(channels) * 9 + 1))
+        while True:
+            for i in range(10):
+                values = self.adcs[0].get_channels([0, 1, 2, 3], voltages = voltages) + self.adcs[1].get_channels([0, 1, 2, 3], voltages = voltages)
 
-        w = 0
-        while (w < 10):
-            w += 1
-            n_values = [adc.get_channels(channels, voltages = True) for channels in n_channels]
+                values[0:4] = [value * 4 / 0.1811 for value in values[0:4]]  # measured conversion factor, theoretical one doesnt work (10 / 0.4)
+                print("".join([f"|  {value:+1.4f}  " for value in values]) + "|")
+                time.sleep(interval)
+            print("-" * 97)
+            print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+            print("-" * 97)
 
-            for values in n_values:
-                print("| " + " | ".join([f"{i:6.3f}" for i in values]) + " |", end="")
-            print("")
-
-            time.sleep(interval)
-
-            # print("-" * (len(channels) * 9 + 1))
-            # if voltages:
-            #     print("| " + " | ".join([f"{i:6.3f}" for i in values]) + " |")
-            # else:
-            #     print("| " + " | ".join([f"{i:6}" for i in values]) + " |")
 
 if __name__ == "__main__":
 
     from adc_ads1115 import ADC
 
-    adc = ADC()
-    adcs = ADCS([adc])
-    adcs.get_channels([[0, 1, 2, 3]], interval=0.5)
+    adc1 = ADC("48")  # current
+    adc2 = ADC("49")  # doesnt matter
+    adcs = ADCS([adc1, adc2])
+    adcs.get_channels(0.8)

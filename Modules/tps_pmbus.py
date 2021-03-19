@@ -33,7 +33,7 @@ class TPS:
         register = self.check_and_convert_hex(register)
 
         with SMBus(self.bus) as bus:
-            byte = bus.get_byte_data(self.device_address, register)
+            byte = bus.read_byte_data(self.device_address, register)
 
         if verbose:
             print("Hex: " + str.upper(format(byte, "02x")))
@@ -272,9 +272,22 @@ if __name__ == "__main__":
     # import and instantiate automatically if file is called directly
     from tps_pmbus import TPS
 
-    tps1b = TPS("1b")
-    tps12 = TPS("12")
-    print("TPS object instatiated. Call it with tps.method()")
+    tps15 = TPS("15")
+    tps15.load_defaults()
 
-    tps1b.load_defaults()
-    # tps12.load_defaults()
+    # tps16 = TPS("16")
+    # tps16.load_defaults()
+
+    # tps1a = TPS("1a")
+    # tps1a.load_defaults()
+
+    # tps1b = TPS("1b")
+    # tps1b.load_defaults()
+
+    #  tps1c = TPS("1c")
+    #  tps1c.load_defaults()
+
+    # tps1c = TPS("1d")
+    # tps1c.load_defaults()
+
+    print("TPS object instatiated. Call it with tpsX.method()")
