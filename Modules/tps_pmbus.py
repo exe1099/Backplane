@@ -20,6 +20,8 @@ class TPS:
         except IOError:
             raise IOError(f"No communication with device under {self.device_address}")
 
+        print(f"TPS object instantiated. Call with tps{device_address}.method()")
+
     def get_byte(self, register: str, verbose=True):
         """Read register.
 
@@ -33,7 +35,7 @@ class TPS:
         register = self.check_and_convert_hex(register)
 
         with SMBus(self.bus) as bus:
-            byte = bus.read_byte_data(self.device_address, register)
+            byte = bus.read_byte_data(self.device_address, register)  # returned as int
 
         if verbose:
             print("Hex: " + str.upper(format(byte, "02x")))
@@ -255,6 +257,7 @@ class TPS:
         self.get_switch_freq()
         self.toggle_converter(1)
         self.get_status_word()
+        print("Default settings loaded!")
 
     ### Commands ###
     def clear_faults(self):
@@ -266,28 +269,3 @@ class TPS:
     def restore_defaults(self):
         self.send_byte("12")
 
-
-if __name__ == "__main__":
-
-    # import and instantiate automatically if file is called directly
-    from tps_pmbus import TPS
-
-    tps15 = TPS("15")
-    tps15.load_defaults()
-
-    # tps16 = TPS("16")
-    # tps16.load_defaults()
-
-    # tps1a = TPS("1a")
-    # tps1a.load_defaults()
-
-    # tps1b = TPS("1b")
-    # tps1b.load_defaults()
-
-    #  tps1c = TPS("1c")
-    #  tps1c.load_defaults()
-
-    # tps1c = TPS("1d")
-    # tps1c.load_defaults()
-
-    print("TPS object instatiated. Call it with tpsX.method()")

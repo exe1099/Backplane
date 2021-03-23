@@ -103,7 +103,7 @@ class ADCS:
         """
         self.adcs = adcs
 
-    def get_channels(self, interval: float = 0, voltages: bool = True):
+    def get_channels(self, interval: float = 0, voltages: bool = True, current_conversion_factor: float = 10 / 0.4):  # theoretical one, doesn't work too well
         """Read all channels of both ADCs.
 
         Args:
@@ -113,29 +113,21 @@ class ADCS:
         Returns:
         """
         unit = "Volt" if voltages else "Bins"
-        print("-" * 97)
-        print(f"|                    ADC {self.adcs[0].device_address} [{unit}]              |                    ADC {self.adcs[1].device_address} [{unit}]              |")
-        print("-" * 97)
-        print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
-        print("-" * 97)
+        print("-" * 100)
+        print(f"|                     ADC {self.adcs[0].device_address} [{unit}]                |                    ADC {self.adcs[1].device_address} [{unit}]              |")
+        print("-" * 100)
+        # print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+        print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
+        print("-" * 100)
 
         while True:
             for i in range(10):
                 values = self.adcs[0].get_channels([0, 1, 2, 3], voltages = voltages) + self.adcs[1].get_channels([0, 1, 2, 3], voltages = voltages)
 
-                values[0:4] = [value * 4 / 0.1811 for value in values[0:4]]  # measured conversion factor, theoretical one doesnt work (10 / 0.4)
+                values[0:4] = [value * current_conversion_factor for value in values[0:4]]  # convert voltages to current
                 print("".join([f"|  {value:+1.4f}  " for value in values]) + "|")
                 time.sleep(interval)
             print("-" * 97)
-            print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+            # print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
             print("-" * 97)
-
-
-if __name__ == "__main__":
-
-    from adc_ads1115 import ADC
-
-    adc1 = ADC("48")  # current
-    adc2 = ADC("49")  # doesnt matter
-    adcs = ADCS([adc1, adc2])
-    adcs.get_channels(0.8)
