@@ -212,6 +212,8 @@ class TPS:
         self.get_converter()
         self.get_status_word()
 
+
+
     def get_soft_start_config(self):
         byte = format(self.get_byte("d2", verbose=False), "08b")
         sst = 2 ** int(byte[4:6], 2)
@@ -255,7 +257,7 @@ class TPS:
         self.get_UVLO_threshold()
         self.set_switch_freq(7)
         self.get_switch_freq()
-        self.toggle_converter(1)
+        self.toggle_converter(0)
         self.get_status_word()
         print("Default settings loaded!")
 
