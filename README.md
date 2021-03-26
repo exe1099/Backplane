@@ -44,7 +44,11 @@ Controlling Boards
         * 0-3
     * get_UVLO_threshold()
     * load_defaults()
-        * 1 MHz, ignore enable pin, converter on
+        * 1 MHz, ignore enable pin, FCCM, converter off (on with toggle_converter())
+    * toggle_fccm(n)
+        * 0: DCM (discontinuous conduction mode)
+        * 1: FCCM (forced continuous conduction mode)
+        * nothing/-1: toggle
 
 Reading ADCS
 ============

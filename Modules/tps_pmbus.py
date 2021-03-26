@@ -212,16 +212,18 @@ class TPS:
         self.get_converter()
         self.get_status_word()
 
-
+    def toggle_FCCM(self, i: int = -1):
+        """Switch between discontinuous (DCM) and forced continuous conduction mode and (FCCM).
+        """
+        written = self.set_bit("D2", 0, i)
+        print("FCCM: " + written)
 
     def get_soft_start_config(self):
         byte = format(self.get_byte("d2", verbose=False), "08b")
         sst = 2 ** int(byte[4:6], 2)
         print(f"Soft-start time: {sst}ms")
-
         hiccup = not bool(int(byte[6]))
         print(f"Hiccup after UV: {hiccup}")
-
         fccm = bool(int(byte[7]))
         print(f"Forced continuous conduction mode: {fccm}")
 
@@ -253,6 +255,7 @@ class TPS:
         self.toggle_en_pin_behaviour(0)
         self.toggle_on_off_bit_behaviour(1)
         self.get_write_protect()
+        self.toggle_FCCM(1)
         self.get_soft_start_config()
         self.get_UVLO_threshold()
         self.set_switch_freq(7)
