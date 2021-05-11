@@ -116,8 +116,10 @@ class ADCS:
         print("-" * 100)
         print(f"|                     ADC {self.adcs[0].device_address} [{unit}]                |                    ADC {self.adcs[1].device_address} [{unit}]              |")
         print("-" * 100)
-        # print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
-        print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
+        if self.adcs[1].device_address == 73:
+            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+        else:
+            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
         print("-" * 100)
 
         while True:
@@ -128,6 +130,8 @@ class ADCS:
                 print("".join([f"|  {value:+1.4f}  " for value in values]) + "|")
                 time.sleep(interval)
             print("-" * 97)
-            # print("| Current 1 | Current 2 | Current 3 | Current 4 |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
-            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
+            if self.adcs[1].device_address == 73:
+                print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
+            else:
+                print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
             print("-" * 97)

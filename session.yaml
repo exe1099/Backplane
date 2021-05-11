@@ -1,0 +1,10 @@
+session_name: backplane
+windows:
+  - window_name: backplane
+    layout: even-horizontal
+    panes:
+      - shell_command:
+        - python3 -i Panes/control_boards.py
+        focus: true
+      - shell_command:
+        - python3 Panes/adc_readout.py

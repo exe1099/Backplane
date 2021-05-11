@@ -147,13 +147,15 @@ class TPS:
         byte = self.get_byte("01", verbose=False)
         print("Converter on: " + format(byte, "08b")[0])
 
-    def toggle_en_pin_behaviour(self, i: int = -1):
+    def toggle_en_pin_behaviour(self, i: int = -1, verbose=True):
         written = self.set_bit("02", 2, i)
-        print("Enable pin behaviour: " + written)
+        if verbose:
+            print("Enable pin behaviour: " + written)
 
-    def toggle_on_off_bit_behaviour(self, i: int = -1):
+    def toggle_on_off_bit_behaviour(self, i: int = -1, verbose=True):
         written = self.set_bit("02", 3, i)
-        print("On-off bit behaviour: " + written)
+        if verbose:
+            print("On-off bit behaviour: " + written)
 
     def set_switch_freq(self, i: int = 7):
         byte = "b" + str(i)
@@ -212,11 +214,12 @@ class TPS:
         self.get_converter()
         self.get_status_word()
 
-    def toggle_FCCM(self, i: int = -1):
+    def toggle_FCCM(self, i: int = -1, verbose=True):
         """Switch between discontinuous (DCM) and forced continuous conduction mode and (FCCM).
         """
         written = self.set_bit("D2", 0, i)
-        print("FCCM: " + written)
+        if verbose:
+            print("FCCM: " + written)
 
     def get_soft_start_config(self):
         byte = format(self.get_byte("d2", verbose=False), "08b")
@@ -252,16 +255,16 @@ class TPS:
         self.get_UVLO_threshold()
 
     def load_defaults(self):
-        self.toggle_en_pin_behaviour(0)
-        self.toggle_on_off_bit_behaviour(1)
-        self.get_write_protect()
-        self.toggle_FCCM(1)
-        self.get_soft_start_config()
-        self.get_UVLO_threshold()
+        self.toggle_en_pin_behaviour(0, verbose=False)
+        self.toggle_on_off_bit_behaviour(1, verbose=False)
+        #  self.get_write_protect()
+        self.toggle_FCCM(1, verbose=False)
+        #  self.get_soft_start_config()
+        #  self.get_UVLO_threshold()
         self.set_switch_freq(7)
-        self.get_switch_freq()
+        #  self.get_switch_freq()
         self.toggle_converter(0)
-        self.get_status_word()
+        #  self.get_status_word()
         print("Default settings loaded!")
 
     ### Commands ###
