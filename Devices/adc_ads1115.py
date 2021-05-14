@@ -1,5 +1,6 @@
 import time
 import Adafruit_ADS1x15
+import tableprint as tp
 
 
 class ADC:
@@ -7,21 +8,26 @@ class ADC:
     gain_limits = {1: 4.096, 2: 2.048, 4: 1.024, 8: 0.512, 16: 0.256}
     max_bin = 2 ** 16 - 1
 
-    def __init__(self, device_address: str = "48", bus: int = 4, gain: int = 1):
+    def __init__(self, device_address: str = "48", name: str = "???", bus: int = 4, gain: int = 1, unit: int = 1, current_conv_factor: float = 1):
         """Instanciate object.
 
         Args:
             device_address (str): Device's I2C address. Two digit hex.
             bus (int): I2C bus to use.
             gain (int): Gain of chip. See datasheet.
+            unit [0, 1, 2]: 0 for return number of bins, 1 for return voltages, 2 for return current (voltage * curr_conv_factor)
+            current_conv_factor (float): if unit is 2, measured voltages are multiplied with this factor to get a current reading
         """
         self.device_address = self.check_and_convert_hex(device_address)
+        self.name = name
         self.bus = bus
         self.adc = Adafruit_ADS1x15.ADS1115(
             address=self.device_address, busnum=self.bus
         )
         self.gain = None
         self.set_gain(gain)
+        self.set_unit(unit)
+        self.current_conv_factor = current_conv_factor
 
     def check_and_convert_hex(self, hex: str):
         """Check two-digit hex and convert to integer.
@@ -35,6 +41,17 @@ class ADC:
         if len(hex) != 2:
             raise Exception("Address wrong length.")
         return int(hex, 16)
+
+    def set_unit(self, unit):
+        """Set unit of ADC.
+
+        Args:
+            unit [0, 1, 2]: 0 for number of bins, 1 for voltage, 2 for current (voltage times current_conv_factor)
+        """
+        if unit in [0, 1, 2]:
+            self.unit = unit
+        else:
+            print("Unit has to be 0 (number of bins), 1 (voltages) or 2 (current).")
 
     def set_gain(self, gain, verbose=False):
         """Set gain of ADC.
@@ -75,21 +92,26 @@ class ADC:
         print(f"Gain set to {self.gain}.")
         print(f"Limits: +/- {self.gain_limits[self.gain]}")
 
-    def get_channels(self, channels=[0, 1, 2, 3], voltages: bool = True):
+    def get_channels(self, channels=[0, 1, 2, 3]):
         """Read channels.
 
         Args:
             channels (list of int): Input channels to read. List containing digits 0, 1, 2, 3.
-            voltages (bool): True to get voltages, False to get number of bins.
 
         Returns:
-            list of floats: Read values as voltages or number of bins.
+            list of floats: Measurements as number of bins, voltages or currents, depending on value of self.unit.
         """
         values = [self.adc.read_adc(channel, gain=self.gain) for channel in channels]
 
-        if voltages:
+        if self.unit == 1:
+            # voltages
             values = [
-                value * self.gain_limits[self.gain] / ((2**16-1) / 2) for value in values
+                value * self.gain_limits[self.gain] / (self.max_bin / 2) for value in values
+            ]
+        elif self.unit == 2:
+            # currents
+            values = [
+                value * self.gain_limits[self.gain] / (self.max_bin / 2) * self.current_conv_factor for value in values
             ]
         return values
 
@@ -103,35 +125,29 @@ class ADCS:
         """
         self.adcs = adcs
 
-    def get_channels(self, interval: float = 0, voltages: bool = True, current_conversion_factor: float = 10 / 0.4):  # theoretical one, doesn't work too well
-        """Read all channels of both ADCs.
+    def get_channels(self, interval: float = 0):
+        """Read all channels of ADCs.
 
         Args:
-            interval (float): Continous read with interval seconds between reads. 0 for single read.
-            voltages (bool): True to get voltages, False to get number of bins.
-
-        Returns:
+            interval (float): Continous read with interval seconds between reads.
         """
-        unit = "Volt" if voltages else "Bins"
-        print("-" * 100)
-        print(f"|                     ADC {self.adcs[0].device_address} [{unit}]                |                    ADC {self.adcs[1].device_address} [{unit}]              |")
-        print("-" * 100)
-        if self.adcs[1].device_address == 73:
-            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
-        else:
-            print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
-        print("-" * 100)
+        unit_dic = {0: "# Bins", 1: "V", 2: "A"}
+
+        # header shown only once at top
+        header1 = [f"ADC {adc.device_address} [{unit_dic[adc.unit]}]" for adc in self.adcs]
+        # header with column names
+        header2 = []
+        for adc in self.adcs:
+            header2.extend([f"{adc.name} {i}" for i in range(1,5)])
+        
+        print(tp.header(header1, width = 80))
+        print(tp.header(header2, width = 20))
 
         while True:
             for i in range(10):
-                values = self.adcs[0].get_channels([0, 1, 2, 3], voltages = voltages) + self.adcs[1].get_channels([0, 1, 2, 3], voltages = voltages)
-
-                values[0:4] = [value * current_conversion_factor for value in values[0:4]]  # convert voltages to current
-                print("".join([f"|  {value:+1.4f}  " for value in values]) + "|")
                 time.sleep(interval)
-            print("-" * 97)
-            if self.adcs[1].device_address == 73:
-                print("| Current 1 | Current 2  | Current 3  | Current 4  |  VDiode1  |  VDiode2  |  VDiode3  |  VDiode4  |")
-            else:
-                print("| Current 1 | Current 2  | Current 3  | Current 4  |  VMuPix1  |  VMuPix2  |  VMuPix3  |  VMuPix4  |")
-            print("-" * 97)
+                values = []
+                for adc in self.adcs:
+                    values.extend(adc.get_channels())
+                print(tp.row(values, width=20), flush=True)
+            print(tp.header(header2, width = 20))

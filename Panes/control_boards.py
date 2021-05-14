@@ -1,51 +1,86 @@
 import sys
 sys.path.append(".")
-from Modules.tps_pmbus import TPS
+from Devices.tps_pmbus import TPS
 
+
+# try to initilize boards with all kind of addresses
 try:
-    tps10 = TPS("10")
-    tps10.load_defaults()
+    t10 = TPS("10")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps15 = TPS("15")
-    tps15.load_defaults()
+    t10 = TPS("11")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps16 = TPS("16")
-    tps16.load_defaults()
+    t10 = TPS("12")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps1a = TPS("1a")
-    tps1a.load_defaults()
+    t10 = TPS("13")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps1b = TPS("1b")
-    tps1b.load_defaults()
+    t10 = TPS("14")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps1c = TPS("1c")
-    tps1c.load_defaults()
+    t10 = TPS("15")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps16 = TPS("16")
-    tps16.load_defaults()
+    t10 = TPS("16")
+    t10.load_defaults()
 except IOError as e:
     pass
-
 try:
-    tps1d = TPS("1d")
-    tps1d.load_defaults()
+    t10 = TPS("17")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("18")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("19")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1a")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1b")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1c")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1d")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1e")
+    t10.load_defaults()
+except IOError as e:
+    pass
+try:
+    t10 = TPS("1f")
+    t10.load_defaults()
 except IOError as e:
     pass

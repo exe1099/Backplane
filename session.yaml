@@ -4,7 +4,7 @@ windows:
     layout: even-horizontal
     panes:
       - shell_command:
-        - python3 -i Panes/control_boards.py
+        - python3 -i Devices/control_boards.py
         focus: true
       - shell_command:
-        - python3 Panes/adc_readout.py
+        - python3 Devices/adc_readout.py
