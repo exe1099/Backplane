@@ -1,6 +1,6 @@
 #!//usr/bin/python3
 
-import argparse
+# import argparse
 from smbus2 import SMBus
 
 
@@ -18,7 +18,7 @@ class TPS:
         try:
             self.get_byte("01", verbose=False)
         except IOError:
-            raise IOError(f"No communication with device under {self.device_address}")
+            raise IOError(f"No communication with device under {device_address}")
 
         print(f"TPS object instantiated. Call with tps{device_address}.method()")
 
@@ -139,41 +139,61 @@ class TPS:
         return temp[n_bit]
 
     ### Shortcut Functions ###
-    def toggle_converter(self, i: int = -1):
+    def toggle_on_off_bit(self, i: int = -1, verbose=True):
         written = self.set_bit("01", 7, i)
-        print("Converter on: " + written)
+        if verbose:
+            print("On-off bit: " + written)
+        return written
 
-    def get_converter(self):
+    def get_on_off_bit(self, verbose=True):
         byte = self.get_byte("01", verbose=False)
-        print("Converter on: " + format(byte, "08b")[0])
+        if verbose:
+            print("On-off Bit: " + format(byte, "08b")[0])
+        return format(byte, "08b")[0]
 
     def toggle_en_pin_behaviour(self, i: int = -1, verbose=True):
         written = self.set_bit("02", 2, i)
         if verbose:
             print("Enable pin behaviour: " + written)
 
+    def get_en_pin_behaviour(self, verbose=True):
+        byte = self.get_byte("02", verbose=False)
+        if verbose:
+            print("Enable Pin Behaviour: " + format(byte, "08b")[2])
+        return format(byte, "08b")[2]
+
     def toggle_on_off_bit_behaviour(self, i: int = -1, verbose=True):
         written = self.set_bit("02", 3, i)
         if verbose:
             print("On-off bit behaviour: " + written)
 
+    def get_on_off_bit_behaviour(self, verbose=True):
+        byte = self.get_byte("02", verbose=False)
+        if verbose:
+            print("On-off Bit Behaviour: " + format(byte, "08b")[3])
+        return format(byte, "08b")[3]
+
     def set_switch_freq(self, i: int = 7):
         byte = "b" + str(i)
         self.set_byte("d3", byte)
 
-    def get_switch_freq(self):
+    def get_switch_freq(self, verbose=True):
         byte = format(self.get_byte("d3", verbose=False), "08b")
         value = int(byte[5:], 2)
 
         dic = {0: 275, 1: 325, 2: 425, 3: 525, 4: 625, 5: 750, 6: 850, 7: 1000}
-        print(f"Switching Freq.: {dic[value]} kHz")
+        if verbose:
+            print(f"Switching Freq.: {dic[value]} kHz")
+        return dic[value]
 
-    def get_write_protect(self):
+    def get_write_protection(self, verbose=True):
         byte = self.get_byte("10", verbose=False)
-        if byte == 0:
-            print("Write protection: off")
-        else:
-            print("Write protection set to: " + format(byte, "08b"))
+        if verbose:
+            if byte == 0:
+                print("Write protection: off")
+            else:
+                print("Write protection set to: " + format(byte, "08b"))
+        return byte
 
     def get_status_word(self, verbose=True):
         word = format(self.get_word("79", verbose=False), "016b")
@@ -214,34 +234,23 @@ class TPS:
         self.get_converter()
         self.get_status_word()
 
-    def toggle_FCCM(self, i: int = -1, verbose=True):
+    def toggle_fccm(self, i: int = -1, verbose=True):
         """Switch between discontinuous (DCM) and forced continuous conduction mode and (FCCM).
         """
         written = self.set_bit("D2", 0, i)
         if verbose:
             print("FCCM: " + written)
 
-    def get_soft_start_config(self):
+    def get_soft_start_config(self, verbose=True):
         byte = format(self.get_byte("d2", verbose=False), "08b")
         sst = 2 ** int(byte[4:6], 2)
-        print(f"Soft-start time: {sst}ms")
         hiccup = not bool(int(byte[6]))
-        print(f"Hiccup after UV: {hiccup}")
         fccm = bool(int(byte[7]))
-        print(f"Forced continuous conduction mode: {fccm}")
-
-    def get_UVLO_threshold(self):
-        byte = format(self.get_byte("d6", verbose=False), "08b")
-        dic = {
-            "000": 10.2,
-            "001": 10.2,
-            "010": 10.2,
-            "011": 10.2,
-            "101": 4.25,
-            "110": 6,
-            "111": 8.1,
-        }
-        print(f"UVLO threshold: {dic[byte[5:]]} V")
+        if verbose:
+            print(f"Soft-start time: {sst}ms")
+            print(f"Hiccup after UV: {hiccup}")
+            print(f"Forced continuous conduction mode: {fccm}")
+        return [sst, hiccup, fccm]
 
     def set_UVLO_threshold(self, i: int = 0):
         """Write UVLO threshold.
@@ -254,16 +263,31 @@ class TPS:
         self.set_byte("d6", "00000" + dic[i])
         self.get_UVLO_threshold()
 
+    def get_UVLO_threshold(self, verbose=True):
+        byte = format(self.get_byte("d6", verbose=False), "08b")
+        dic = {
+            "000": 10.2,
+            "001": 10.2,
+            "010": 10.2,
+            "011": 10.2,
+            "101": 4.25,
+            "110": 6,
+            "111": 8.1,
+        }
+        if verbose:
+            print(f"UVLO threshold: {dic[byte[5:]]} V")
+        return dic[byte[5:]]
+
     def load_defaults(self):
         self.toggle_en_pin_behaviour(0, verbose=False)
         self.toggle_on_off_bit_behaviour(1, verbose=False)
         #  self.get_write_protect()
-        self.toggle_FCCM(1, verbose=False)
+        self.toggle_fccm(1, verbose=False)
         #  self.get_soft_start_config()
         #  self.get_UVLO_threshold()
         self.set_switch_freq(7)
         #  self.get_switch_freq()
-        self.toggle_converter(0)
+        self.toggle_on_off_bit(0, verbose=False)
         #  self.get_status_word()
         print("Default settings loaded!")
 

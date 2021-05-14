@@ -1,6 +1,7 @@
 import time
 import Adafruit_ADS1x15
 import tableprint as tp
+import numpy as np
 
 
 class ADC:
@@ -140,8 +141,9 @@ class ADCS:
         for adc in self.adcs:
             header2.extend([f"{adc.name} {i}" for i in range(1,5)])
         
-        print(tp.header(header1, width = 80))
-        print(tp.header(header2, width = 20))
+        width = 6
+        print(tp.header(header1, width = 4 * (width + 2) + 1))
+        print(tp.header(header2, width = width))
 
         while True:
             for i in range(10):
@@ -149,5 +151,6 @@ class ADCS:
                 values = []
                 for adc in self.adcs:
                     values.extend(adc.get_channels())
-                print(tp.row(values, width=20), flush=True)
-            print(tp.header(header2, width = 20))
+                values = np.round(np.array(values), 2)
+                print(tp.row(values, width=width), flush=True)
+            print(tp.header(header2, width = width))

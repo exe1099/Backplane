@@ -1,10 +1,14 @@
 session_name: backplane
 windows:
-  - window_name: backplane
-    layout: even-horizontal
+  - window_name: minicrate
+    layout: main-vertical
+    options:
+      main-pane-width: 140
     panes:
       - shell_command:
-        - python3 -i Devices/control_boards.py
+        - python3 Panes/adc_readout.py
+      - shell_command:
+        - python3 -i Panes/control_boards.py
         focus: true
       - shell_command:
-        - python3 Devices/adc_readout.py
+        - python3 Panes/status_table.py

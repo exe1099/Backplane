@@ -1,86 +1,89 @@
 import sys
 sys.path.append(".")
 from Devices.tps_pmbus import TPS
+import os
+
+os.system("clear")
 
 
 # try to initilize boards with all kind of addresses
 try:
-    t10 = TPS("10")
-    t10.load_defaults()
+    tps10 = TPS("10")
+    tps10.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("11")
-    t10.load_defaults()
+    tps11 = TPS("11")
+    tps11.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("12")
-    t10.load_defaults()
+    tps12 = TPS("12")
+    tps12.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("13")
-    t10.load_defaults()
+    tps13 = TPS("13")
+    tps13.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("14")
-    t10.load_defaults()
+    tps14 = TPS("14")
+    tps14.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("15")
-    t10.load_defaults()
+    tps15 = TPS("15")
+    tps15.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("16")
-    t10.load_defaults()
+    tps16 = TPS("16")
+    tps16.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("17")
-    t10.load_defaults()
+    tps17 = TPS("17")
+    tps17.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("18")
-    t10.load_defaults()
+    tps18 = TPS("18")
+    tps18.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("19")
-    t10.load_defaults()
+    tps19 = TPS("19")
+    tps19.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1a")
-    t10.load_defaults()
+    tps1a = TPS("1a")
+    tps1a.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1b")
-    t10.load_defaults()
+    tps1b = TPS("1b")
+    tps1b.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1c")
-    t10.load_defaults()
+    tps1c = TPS("1c")
+    tps1c.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1d")
-    t10.load_defaults()
+    tps1d = TPS("1d")
+    tps1d.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1e")
-    t10.load_defaults()
+    tps1e = TPS("1e")
+    tps1e.load_defaults()
 except IOError as e:
     pass
 try:
-    t10 = TPS("1f")
-    t10.load_defaults()
+    tps1f = TPS("1f")
+    tps1f.load_defaults()
 except IOError as e:
     pass
