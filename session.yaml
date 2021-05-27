@@ -4,6 +4,7 @@ windows:
     layout: main-vertical
     options:
       main-pane-width: 140
+      main-pane-height: 20
     panes:
       - shell_command:
         - python3 Panes/adc_readout.py
@@ -11,4 +12,6 @@ windows:
         - python3 -i Panes/control_boards.py
         focus: true
       - shell_command:
+        - python3 -c "import time; time.sleep(1)"
+        - tmux resize-pan -U 20
         - python3 Panes/status_table.py

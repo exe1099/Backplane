@@ -1,9 +1,13 @@
 import sys
 sys.path.append(".")
 from Devices.tps_pmbus import TPS
+from Devices.gpio_pins import ENABLE_SWITCH
 import os
 
 os.system("clear")
+
+switch = ENABLE_SWITCH()
+print("Controll of enable-switch: switch.set(<n_slot>, <0 or 1>)")
 
 
 # try to initilize boards with all kind of addresses

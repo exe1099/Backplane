@@ -197,30 +197,32 @@ class TPS:
 
     def get_status_word(self, verbose=True):
         word = format(self.get_word("79", verbose=False), "016b")
+        translated = []
         print("Status word: " + word)
-
+        flags_set = [i for i in range(len(word)) if word[i] == "1"]
+        flag_dic = {
+            0: "Output voltage fault or warning has occured (latched).",
+            1: "Output current fault or warning has occured (latched).",
+            2: "Input voltage fault or warning has occured (latched).",
+            3: "MFR (not implemented, should always be 0).",
+            4: "PGOOD is low (status).",
+            5: "FANS (not implemented, should always be 0).",
+            6: "OTHER (not implemented, should always be 0).",
+            7: "UNKNOWN (not implemented, should always be 0).",
+            8: "Busy (not implemented, should always be 0).",
+            9: "Not providing power to output voltage (status).",
+            10: "Output voltage overvoltage fault has occured (latched).",
+            11: "Output current overcurrent fault has occured (latched).",
+            12: "Input voltage is below UVLO turn-on threshold (latched).",
+            13: "Over temperature fault has occured (latched).",
+            14: "Communication, memory or logic fault has occured (latched).",
+            15: "More faults in high byte.",
+        }
+        for i in flags_set:
+            translated.append(flag_dic[i])
+        seperator = "\n"
         if verbose:
-            flags_set = [i for i in range(len(word)) if word[i] == "1"]
-            flag_dic = {
-                0: "Output voltage fault or warning has occured (latched).",
-                1: "Output current fault or warning has occured (latched).",
-                2: "Input voltage fault or warning has occured (latched).",
-                3: "MFR (not implemented, should always be 0).",
-                4: "PGOOD is low (status).",
-                5: "FANS (not implemented, should always be 0).",
-                6: "OTHER (not implemented, should always be 0).",
-                7: "UNKNOWN (not implemented, should always be 0).",
-                8: "Busy (not implemented, should always be 0).",
-                9: "Not providing power to output voltage (status).",
-                10: "Output voltage overvoltage fault has occured (latched).",
-                11: "Output current overcurrent fault has occured (latched).",
-                12: "Input voltage is below UVLO turn-on threshold (latched).",
-                13: "Over temperature fault has occured (latched).",
-                14: "Communication, memory or logic fault has occured (latched).",
-                15: "More faults in high byte.",
-            }
-            for i in flags_set:
-                print(flag_dic[i])
+            print(seperator.join(translated))
 
     def status(self):
         self.get_converter()

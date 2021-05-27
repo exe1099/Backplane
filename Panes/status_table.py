@@ -1,10 +1,15 @@
 import sys
 sys.path.append(".")
 from Devices.tps_pmbus import TPS
+from Devices.gpio_pins import PGOOD
+from Devices.gpio_pins import TINTERLOCK
+from Devices.gpio_pins import ALERT
+from Devices.ds18b20 import ds18b20_write_queue
 import tableprint as tp
 import time
 import os
 import numpy as np
+from multiprocessing import Process, Queue
 
 # try to initilize boards with all kind of addresses
 addresses = ["10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "1a", "1b", "1c", "1d", "1f"]
@@ -15,14 +20,26 @@ for address in addresses:
         boards.append(board)
     except IOError as e:
         pass
-print(boards)
+
+# initialize gpio pins
+pgood = PGOOD()
+tinterlock = TINTERLOCK()
+alert = ALERT()
+
+# initialize temp sensor seperate process and queue
+queue = Queue()
+writer = Process(target=ds18b20_write_queue, args=((queue),))
+writer.daemon = True
+writer.start()
+ds18b20_data = [("??",0), ("??",0)]  # dummy data to begin with
+temp_address_trans = {"28-00000c443896": "TPS 1c", "28-00000a39aa04": "TPS 11", "28-00000a39366f": "TPS 10"}
 
 i = 0
-
 while True:
     i += 1
     os.system("clear")
 
+    ### Table 1 ###
     width = 20
 
     header = [""]
@@ -67,6 +84,29 @@ while True:
 
     print(tp.bottom(len(boards) + 1, width=width))
 
+    ### Table 2 ###
+    width = 10
+    header = ["", "Slot 1", "Slot 2", "Slot 3", "Slot 4"]
+    print(tp.header(header, width=width))
+
+    powergood = ["PGOOD"]
+    powergood.extend([int(i) for i in pgood.get_values()])
+    print(tp.row(powergood, width=width))
+
+    tempinterlock = ["TINTERLOCK"]
+    tempinterlock.extend([int(i) for i in tinterlock.get_values()])
+    print(tp.row(tempinterlock, width=width))
+
+    alert_ = ["ALERT 1/2"]
+    alert_.extend([int(i) for i in alert.get_values()])
+    alert_.extend(["", ""])
+    print(tp.row(alert_, width=width))
+
+    print(tp.bottom(5, width=width))
+
+
+
+
     for board in boards:
         print("")
         print(f"TPS {format(board.device_address, '02x')}")
@@ -74,8 +114,23 @@ while True:
         board.get_status_word()
 
     print("")
-    print("")
-    print(f"Update-Counter: {i}")
+    header = ["Address"]
+    temps = ["Temp [°C]"]
+
+    if not queue.empty():
+        ds18b20_data = queue.get()
+
+    for id, temp in ds18b20_data:
+        if id in temp_address_trans:
+            header.append(temp_address_trans[id])
+        else:
+            header.append(id)
+        temps.append(f"{temp:.1f}")
+
+    width = 20
+    print(tp.header(header, width=width))
+    print(tp.row(temps, width=width))
+    print(tp.bottom(len(header), width=width))
 
     time.sleep(3)
 
