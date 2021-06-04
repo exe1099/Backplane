@@ -42,34 +42,38 @@ class ALERT:
 
 class ENABLE_SWITCH:
     def __init__(self):
+        # enable low at start
         self.switches = [LED(22, initial_value = False), 
                          LED(27, initial_value = False), 
                          LED(17, initial_value = False), 
                          LED(4, initial_value = False)]
-        # enable low at start
+        self.state = [0, 0, 0, 0]
+        self.write_state()
     
+    def write_state(self):
+        with open("enable_switch_state.txt", "w") as file:
+            file.write(" ".join(str(e) for e in self.state))
+
     def set(self, slot : int, bit : int):
+        # checks
         if slot not in range(1, 5):
             print("Slot must be 1, 2, 3 or 4.")
             return None
         if bit not in [0, 1]:
             print("Second parameter must be 0 (switch open --> enable low) or 1 (switch closed --> enable high).")
             return None
+        # switch pin
         if bit:
-            print("wrote")
             self.switches[slot - 1].on()
         else:
             self.switches[slot - 1].off()
-        self.get()
+        # update
+        self.state[slot - 1] = bit
+        self.write_state()
 
     def get(self, verbose=True):
-        state = [switch.value for switch in self.switches]
         if verbose:
-            state_str = [str(i) for i in state]
-            state_str = " ".join(state_str)
+            state_str = " ".join([str(i) for i in self.state])
             print("State: " + state_str)
         else:
-            return state
-
-
-
+            return self.state
