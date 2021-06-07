@@ -6,22 +6,13 @@ from Devices.gpio_pins import PGOOD
 from Devices.gpio_pins import TINTERLOCK
 from Devices.gpio_pins import ALERT
 from Devices.ds18b20 import ds18b20_write_queue
+from Panes.t_colors import TColors
 import tableprint as tp
 import time
 import os
 import numpy as np
 from multiprocessing import Process, Queue
 
-
-# buffered print
-buffered_output = ""
-def bprint(str: s, bool: reset = False):
-    if reset:
-        os.system("clear")
-        print(buffered_output)
-        buffered_output = ""
-    else:
-        buffered_output = buffered_output + s + "\n"
 
 # try to initilize boards with all kind of addresses
 addresses = [
@@ -75,85 +66,94 @@ while True:
     # header
     header = [""]
     header.extend([f"TPS {format(board.device_address, '02x')}" for board in boards])
-    bprint(tp.header(header, width=width))
+    print(tp.header(header, width=width))
+
+    # on-off bit
+    on_off_bit = ["on_off_bit"]
+    for board in boards:
+        i = board.get_on_off_bit(verbose=False)
+        if int(i):
+            on_off_bit.append(TColors.GREEN + i + TColors.END)
+        else:
+            on_off_bit.append(TColors.RED + i + TColors.END)
+    # on_off_bit.extend([f"{board.get_on_off_bit(verbose=False)}" for board in boards])
+    print(tp.row(on_off_bit, width=width))
+
+    # on-off bit behaviour
+    on_off_bit_behaviour = ["on_off_bit_behaviour"]
+    on_off_bit_behaviour.extend(
+        [f"{TColors.BLUE + board.get_on_off_bit_behaviour(verbose=False) + TColors.END}" for board in boards]
+    )
+    print(tp.row(on_off_bit_behaviour, width=width))
+
+    # en-pin behaviour
+    en_pin_behaviour = ["en_pin_behaviour"]
+    en_pin_behaviour.extend(
+        [f"{TColors.BLUE + board.get_en_pin_behaviour(verbose=False) + TColors.END}" for board in boards]
+    )
+    print(tp.row(en_pin_behaviour, width=width))
 
     # switching frequency
     switch_freq = ["switch_freq"]
     switch_freq.extend(
         [f"{board.get_switch_freq(verbose=False)} kHz" for board in boards]
     )
-    bprint(tp.row(switch_freq, width=width))
-
-    # on-off bit
-    on_off_bit = ["on_off_bit"]
-    on_off_bit.extend([f"{board.get_on_off_bit(verbose=False)}" for board in boards])
-    bprint(tp.row(on_off_bit, width=width))
-
-    # on-off bit behaviour
-    on_off_bit_behaviour = ["on_off_bit_behaviour"]
-    on_off_bit_behaviour.extend(
-        [f"{board.get_on_off_bit_behaviour(verbose=False)}" for board in boards]
-    )
-    bprint(tp.row(on_off_bit_behaviour, width=width))
+    print(tp.row(switch_freq, width=width))
 
     # UVLO threshold
     UVLO_threshold = ["UVLO_threshold"]
     UVLO_threshold.extend(
         [f"{board.get_UVLO_threshold(verbose=False)} V" for board in boards]
     )
-    bprint(tp.row(UVLO_threshold, width=width))
-
-    # en-pin behaviour
-    en_pin_behaviour = ["en_pin_behaviour"]
-    en_pin_behaviour.extend(
-        [f"{board.get_en_pin_behaviour(verbose=False)}" for board in boards]
-    )
-    bprint(tp.row(en_pin_behaviour, width=width))
+    print(tp.row(UVLO_threshold, width=width))
 
     # write protection
     write_protection = ["write_protection"]
     write_protection.extend(
         [f"{board.get_write_protection(verbose=False)}" for board in boards]
     )
-    bprint(tp.row(write_protection, width=width))
+    print(tp.row(write_protection, width=width))
 
     # soft_start_config
     data = np.array([board.get_soft_start_config(verbose=False) for board in boards])
     soft_start_time = ["soft_start_time"]
     soft_start_time.extend(f"{i} ms" for i in data.T[0])
-    bprint(tp.row(soft_start_time, width=width))
+    print(tp.row(soft_start_time, width=width))
     hiccup = ["hiccup"]
     hiccup.extend(f"{i}" for i in data.T[1])
-    bprint(tp.row(hiccup, width=width))
+    print(tp.row(hiccup, width=width))
     fccm = ["fccm"]
     fccm.extend(f"{i}" for i in data.T[2])
-    bprint(tp.row(fccm, width=width))
+    print(tp.row(fccm, width=width))
 
     # bottom
-    bprint(tp.bottom(len(boards) + 1, width=width))
+    print(tp.bottom(len(boards) + 1, width=width))
 
     ### Second Table (Slot specific) ###
-    width = 10
+    width = 15
 
     # header
     header = ["", "Slot 1", "Slot 2", "Slot 3", "Slot 4"]
-    bprint(tp.header(header, width=width))
+    print(tp.header(header, width=width))
 
     # powergood
     powergood = ["PGOOD"]
-    powergood.extend([int(i) for i in pgood.get_values()])
-    bprint(tp.row(powergood, width=width))
+    for i in pgood.get_values():
+        if i:
+            powergood.append(TColors.GREEN + str(int(i)) + TColors.END)
+        else:
+            powergood.append(str(int(i)))
+    # powergood.extend([int(i) for i in pgood.get_values()])
+    print(tp.row(powergood, width=width))
 
     # temp interlock
     tempinterlock = ["TINTERLOCK"]
-    tempinterlock.extend([int(i) for i in tinterlock.get_values()])
-    bprint(tp.row(tempinterlock, width=width))
-
-    # alert
-    alert_ = ["ALERT 1/2"]
-    alert_.extend([int(i) for i in alert.get_values()])
-    alert_.extend(["", ""])
-    bprint(tp.row(alert_, width=width))
+    for i in tinterlock.get_values():
+        if i:
+            tempinterlock.append(TColors.RED + str(int(i)) + TColors.END)
+        else:
+            tempinterlock.append(str(int(i)))
+    print(tp.row(tempinterlock, width=width))
 
     # enable switch state
     # read state from file (there must be a better way to transfer data...)
@@ -164,19 +164,29 @@ while True:
         state = ["?", "?", "?", "?"]
 
     en_switch = ["ENABLE SWITCH"]
-    en_switch.extend(s for s in state)
-    bprint(tp.row(en_switch, width=width))
+    for s in state:
+        if int(s):
+            en_switch.append(TColors.GREEN + s + TColors.END)
+        else:
+            en_switch.append(TColors.RED + s + TColors.END)
+    print(tp.row(en_switch, width=width))
+
+    # alert
+    alert_ = ["ALERT 1/2"]
+    alert_.extend([int(i) for i in alert.get_values()])
+    alert_.extend(["", ""])
+    print(tp.row(alert_, width=width))
 
     # bottom
-    bprint(tp.bottom(5, width=width))
+    print(tp.bottom(5, width=width))
 
     ### Status Words ###
     for board in boards:
-        bprint("")
-        bprint(f"TPS {format(board.device_address, '02x')}")
-        bprint("------")
+        print("")
+        print(f"TPS {format(board.device_address, '02x')}")
+        print("------")
         board.get_status_word()
-    bprint("")
+    print("")
 
     ### Temp Table ###
     header = ["Address"]
@@ -193,12 +203,13 @@ while True:
         temps.append(f"{temp:.1f}")
 
     width = 20
-    bprint(tp.header(header, width=width))
-    bprint(tp.row(temps, width=width))
-    bprint(tp.bottom(len(header), width=width))
-
-    ### Print buffered Output ###
-    bprint("", reset=True)
+    try:
+        print(tp.header(header, width=width))
+        print(tp.row(temps, width=width))
+        print(tp.bottom(len(header), width=width))
+    except TypeError:
+        pass
 
     ### Refresh Wait ###
     time.sleep(3)
+    os.system("clear")

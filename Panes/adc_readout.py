@@ -7,7 +7,7 @@ os.system("clear")
 
 # address assignment checked for minicrate v2
 adc_vmupix = ADC("48", "VMup")
-adc_current = ADC("49", "Curr", unit = 2, current_conv_factor= 4 / 0.1811)
+adc_current = ADC("49", "Curr", unit = 2, current_conv_factor= 15 / 0.61)
         # theoretical factor: 10 / 0.4
 adc_vdiode = ADC("4a", "VDio")
 
