@@ -53,6 +53,7 @@ writer.start()
 ds18b20_data = [("??", 0), ("??", 0)]  # dummy data to begin with
 temp_address_trans = {
     "28-00000c443896": "TPS 1c",
+    "28-00000c43ac44" : "TPS 1b",
     "28-00000a39aa04": "TPS 11",
     "28-00000a39366f": "TPS 10",
 }

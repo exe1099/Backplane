@@ -152,5 +152,6 @@ class ADCS:
                 for adc in self.adcs:
                     values.extend(adc.get_channels())
                 values = np.round(np.array(values), 2)
+                values = [f"{value:.2f}" for value in values]
                 print(tp.row(values, width=width), flush=True)
             print(tp.header(header2, width = width))
