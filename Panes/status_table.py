@@ -189,7 +189,7 @@ while True:
         board.get_status_word()
     print("")
 
-    ### Temp Table ###
+    ### Temperatur Table ###
     header = ["Address"]
     temps = ["Temp [°C]"]
 
