@@ -50,7 +50,7 @@ queue = Queue()
 writer = Process(target=ds18b20_write_queue, args=((queue),))
 writer.daemon = True
 writer.start()
-ds18b20_data = [("??", 0), ("??", 0)]  # dummy data to begin with
+ds18b20_data = [("??", 0, "??"), ("??", 0, "??")]  # dummy data to begin with
 temp_address_trans = {
     "28-00000c443896": "TPS 1c",
     "28-00000c43ac44" : "TPS 1b",
@@ -192,21 +192,24 @@ while True:
     ### Temperatur Table ###
     header = ["Address"]
     temps = ["Temp [°C]"]
+    time_ = ["Time"]
 
     if not queue.empty():
         ds18b20_data = queue.get()
 
-    for id, temp in ds18b20_data:
+    for id, temp, measurement_time in ds18b20_data:
         if id in temp_address_trans:
             header.append(temp_address_trans[id])
         else:
             header.append(id)
         temps.append(f"{temp:.1f}")
+        time_.append(measurement_time)
 
     width = 20
     try:
         print(tp.header(header, width=width))
         print(tp.row(temps, width=width))
+        print(tp.row(time_, width=width))
         print(tp.bottom(len(header), width=width))
     except TypeError:
         pass

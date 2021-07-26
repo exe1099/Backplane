@@ -4,7 +4,9 @@ import time
 
 # activate 1-wire interface with: sudo dtoverlay w1-gpio gpiopin=14 pullup=0
 
-def ds18b20_write_queue(queue, use_queue = True, log_data = False):
+def ds18b20_write_queue(queue, use_queue = True):
+
+    log_data = True
 
     while True:
 
@@ -20,26 +22,26 @@ def ds18b20_write_queue(queue, use_queue = True, log_data = False):
                 if "YES" in data:
                     (discard, sep, reading) = data.partition(' t=')
                     t = float(reading) / 1000.0
-                    values.append((id, t))
+                    current_time = time.localtime()
+                    current_time = time.strftime("%H:%M:%S", current_time)
+                    values.append((id, t, current_time))
                 else:
-                    values.append((-1, -1))
+                    values.append((-1, -1, -1))
 
             except:
                 pass
         if use_queue:
-            queue.put(values)
+            if queue.empty():
+                queue.put(values)
         else:
             print(values)
 
         if log_data:
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
             with open("temperatures.data", "a") as file:
-                file.write(f"{current_time} ")
-                for value in values:
-                    file.write(f"{value} ")
-                file.write("\n")
+                for device in values:
+                    id_, temp_, time_ = device
+                    file.write(f"{id_} {temp_} {time_}\n")
 
 if __name__ == "__main__":
     abc = []
-    ds18b20_write_queue(abc, use_queue = False, log_data = True)
+    ds18b20_write_queue(abc, use_queue = False)
