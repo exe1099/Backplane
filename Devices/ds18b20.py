@@ -6,7 +6,7 @@ import time
 
 def ds18b20_write_queue(queue, use_queue = True):
 
-    log_data = True
+    log_data = False
 
     while True:
 
@@ -41,6 +41,8 @@ def ds18b20_write_queue(queue, use_queue = True):
                 for device in values:
                     id_, temp_, time_ = device
                     file.write(f"{id_} {temp_} {time_}\n")
+
+        time.sleep(1)
 
 if __name__ == "__main__":
     abc = []

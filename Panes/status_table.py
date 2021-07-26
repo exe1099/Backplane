@@ -97,7 +97,7 @@ while True:
     # switching frequency
     switch_freq = ["switch_freq"]
     switch_freq.extend(
-        [f"{board.get_switch_freq(verbose=False)} kHz" for board in boards]
+        [f"{board.get_switching_freq(verbose=False)} kHz" for board in boards]
     )
     print(tp.row(switch_freq, width=width))
 

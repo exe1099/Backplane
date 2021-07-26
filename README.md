@@ -1,11 +1,6 @@
 # Backplane
 Code for running the prototype backplane
 
-Layouts
-=======
-* even_horizontal
-
-
 Installation
 ============
 * tps_pmbus module
@@ -24,11 +19,13 @@ Pins Pi
 
 Controlling Boards
 ==================
-* edit control_board.py and uncomment/add lines including device I2C address
-* run `python3 -i control_boards.py` for interactive python session
+* start session with ./start_session.sh
+* this is now running a tmux session with prefix set to control + w (press simultaniously)
+* to exit the session (for example if you turned off the powersupply etc) press prefix followed by x
+  (so ctrl + w simultaniously, let go and then press x)
 * call object with tpsXX.method()
 * function examples
-    * toggle_converter(n)
+    * toggle_on_off_bit()
         * 0: off
         * 1: on
         * nothing/-1: toggle
@@ -37,9 +34,8 @@ Controlling Boards
         * 1: on
         * nothing/-1: toggle
     * get_switching_freq()
-    * set_switch_feq(n)
+    * set_switching_feq(n)
         * 0-7
-    * get_switch_freq()
     * get_status_word()
     * clear_faults()
     * status()
@@ -53,9 +49,21 @@ Controlling Boards
         * 0: DCM (discontinuous conduction mode)
         * 1: FCCM (forced continuous conduction mode)
         * nothing/-1: toggle
+* old stuff (just ignore)
+    * edit control_board.py and uncomment/add lines including device I2C address
+    * run `python3 -i control_boards.py` for interactive python session
+
+Temperature Reading
+===================
+* to activate the one wire temp interface on the RaspberryPi, run ./activate_temp_sensors_interface.sh
+* only need to do that once after every restart
 
 Reading ADCS
 ============
 * run `python3 adc_readout.py`
 * to change parameters edit adc_readout.py 
     `def get_channels(self, interval: float = 0, voltages: bool = True): ...`
+
+Layouts
+=======
+* even_horizontal

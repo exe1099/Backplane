@@ -193,13 +193,13 @@ class TPS:
         else:
             return state
 
-    def set_switch_freq(self, i: int = 7):
+    def set_switching_freq(self, i: int = 7):
         if i not in range(1, 8):
             print("Value must be between 1 (275 kHz) and 7 (1 MHz)")
             return None
         self.set_byte("d3", format(i, "02x"))
 
-    def get_switch_freq(self, verbose=True):
+    def get_switching_freq(self, verbose=True):
         dic = {0: 275, 1: 325, 2: 425, 3: 525, 4: 625, 5: 750, 6: 850, 7: 1000}
         byte = self.get_byte("d3")[5:]
         value = dic[int(byte, 2)]
@@ -256,7 +256,7 @@ class TPS:
         # self.read_write_protect()
         # self.read_soft_start_config()
         self.get_UVLO_threshold()
-        self.get_switch_freq()
+        self.get_switching_freq()
         self.get_converter()
         self.get_status_word()
 
@@ -314,8 +314,8 @@ class TPS:
         self.toggle_fccm(1, verbose=False)
         #  self.get_soft_start_config()
         #  self.get_UVLO_threshold()
-        self.set_switch_freq(7)
-        #  self.get_switch_freq()
+        self.set_switching_freq(7)
+        #  self.get_switching_freq()
         self.toggle_on_off_bit(0, verbose=False)
         #  self.get_status_word()
         print("Default settings loaded!")
