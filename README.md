@@ -11,6 +11,8 @@ Installation
     * in /boot/config.txt uncomment/add:
         `dtparam=i2c_arm=on
         dtoverlay=i2c-gpio,bus=4,i2c_gpio_delay_us=1,i2c_gpio_sda=23,i2c_gpio_scl=24`
+ * configurate i2c bus 3 on pins 7 (sda) and 8 (scl) (normally not needed; for additional external devices)
+        `dtoverlay=i2c-gpio,bus=3,i2c_gpio_delay_us=1,i2c_gpio_sda=7,i2c_gpio_scl=8`
 
 Pins Pi
 =======
@@ -56,7 +58,9 @@ Controlling Boards
 Temperature Reading
 ===================
 * to activate the one wire temp interface on the RaspberryPi, run ./activate_temp_sensors_interface.sh
-* only need to do that once after every restart
+    * only need to do that once after every restart
+* a dictionary converting the unique ID of the temp sensor to a board address can be found under Devices/ds18b20.py
+    * add entry here when adding/changing temp sensor
 
 Reading ADCS
 ============

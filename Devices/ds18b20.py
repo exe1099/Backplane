@@ -6,7 +6,15 @@ import time
 
 def ds18b20_write_queue(queue, use_queue = True):
 
-    log_data = False
+    temp_address_trans = {
+        "28-00000c443896": "TPS_1c",
+        "28-00000a394789": "TPS_1b",
+        "28-00000a39aa04": "TPS_11",
+        "28-00000a39366f": "TPS_10",
+        "28-00000a3a49a2": "Ambient",
+    }
+
+    log_data = True
 
     while True:
 
@@ -24,7 +32,8 @@ def ds18b20_write_queue(queue, use_queue = True):
                     t = float(reading) / 1000.0
                     current_time = time.localtime()
                     current_time = time.strftime("%H:%M:%S", current_time)
-                    values.append((id, t, current_time))
+                    board = temp_address_trans[id] if id in temp_address_trans else id
+                    values.append((board, t, current_time))
                 else:
                     values.append((-1, -1, -1))
 

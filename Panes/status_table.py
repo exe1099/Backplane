@@ -51,12 +51,6 @@ writer = Process(target=ds18b20_write_queue, args=((queue),))
 writer.daemon = True
 writer.start()
 ds18b20_data = [("??", 0, "??"), ("??", 0, "??")]  # dummy data to begin with
-temp_address_trans = {
-    "28-00000c443896": "TPS 1c",
-    "28-00000c43ac44" : "TPS 1b",
-    "28-00000a39aa04": "TPS 11",
-    "28-00000a39366f": "TPS 10",
-}
 
 os.system("clear")
 while True:
@@ -189,7 +183,7 @@ while True:
         board.get_status_word()
     print("")
 
-    ### Temperatur Table ###
+    ### Temperature Table ###
     header = ["Address"]
     temps = ["Temp [°C]"]
     time_ = ["Time"]
@@ -197,11 +191,8 @@ while True:
     if not queue.empty():
         ds18b20_data = queue.get()
 
-    for id, temp, measurement_time in ds18b20_data:
-        if id in temp_address_trans:
-            header.append(temp_address_trans[id])
-        else:
-            header.append(id)
+    for board, temp, measurement_time in ds18b20_data:
+        header.append(board)
         temps.append(f"{temp:.1f}")
         time_.append(measurement_time)
 
