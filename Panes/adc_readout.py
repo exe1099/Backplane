@@ -15,6 +15,8 @@ adc_current = ADC("49", "Curr", unit = 2, current_conv_factor= 25)
         # experimental board 10: 24.6
 adc_vdiode = ADC("4a", "VDio")
 
-adcs = ADCS([adc_current, adc_vmupix, adc_vdiode])
+adcs = ADCS([adc_current])
 # adcs = ADCS([adc_current, adc_vdiode])
+
+
 adcs.get_channels(interval = 1)

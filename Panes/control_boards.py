@@ -8,6 +8,7 @@ os.system("clear")
 
 switch = ENABLE_SWITCH()
 print("Controll of enable-switch: switch.set(<n_slot>, <0 or 1>)")
+print("Leave this session by pressing ctrl-w followed bz ctrl-x")
 
 
 # try to initilize boards with all kind of addresses
