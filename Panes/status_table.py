@@ -1,11 +1,10 @@
 import sys
-
 sys.path.append(".")
 from Devices.tps_pmbus import TPS
 from Devices.gpio_pins import PGOOD
 from Devices.gpio_pins import TINTERLOCK
 from Devices.gpio_pins import ALERT
-from Devices.ds18b20 import ds18b20_write_queue
+from Devices.ds18b20 import run_queue
 from Panes.t_colors import TColors
 import tableprint as tp
 import time
@@ -14,7 +13,7 @@ import numpy as np
 from multiprocessing import Process, Queue
 
 
-# try to initilize boards with all kind of addresses
+### try to initilize boards with all kind of addresses ###
 addresses = [
     "10",
     "11",
@@ -40,14 +39,14 @@ for address in addresses:
     except IOError as e:
         pass
 
-# initialize gpio pins
+### initialize gpio pins ###
 pgood = PGOOD()
 tinterlock = TINTERLOCK()
 alert = ALERT()
 
-# initialize temp sensor seperate process and queue
+### initialize temp sensor seperate process and queue ###
 queue = Queue()
-writer = Process(target=ds18b20_write_queue, args=((queue),))
+writer = Process(target=run_queue, args=((queue),))
 writer.daemon = True
 writer.start()
 ds18b20_data = [("??", 0, "??"), ("??", 0, "??")]  # dummy data to begin with
@@ -188,6 +187,7 @@ while True:
     temps = ["Temp [°C]"]
     time_ = ["Time"]
 
+    # get data from queue if queue is not empty, else show previous data again
     if not queue.empty():
         ds18b20_data = queue.get()
 

@@ -132,6 +132,9 @@ class ADCS:
         Args:
             interval (float): Continous read with interval seconds between reads.
         """
+
+        log_data = True
+
         unit_dic = {0: "# Bins", 1: "V", 2: "A"}
 
         # header shown only once at top
@@ -140,12 +143,13 @@ class ADCS:
         header2 = []
         for adc in self.adcs:
             header2.extend([f"{adc.name} {i}" for i in range(1,5)])
-        
+
         width = 6
         print(tp.header(header1, width = 4 * (width + 2) + 1))
         print(tp.header(header2, width = width))
 
         while True:
+            # print header again after 10 rows
             for i in range(10):
                 time.sleep(interval)
                 values = []
@@ -154,4 +158,7 @@ class ADCS:
                 values = np.round(np.array(values), 2)
                 values = [f"{value:.2f}" for value in values]
                 print(tp.row(values, width=width), flush=True)
+                if log_data:
+                    with open("Data/adcs.data", "a") as file:
+                        file.write(" ".join(values) + "\n")
             print(tp.header(header2, width = width))
