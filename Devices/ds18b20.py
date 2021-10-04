@@ -36,7 +36,7 @@ def read_sensors():
         except:
             pass
 
-        return data_sensors
+    return data_sensors
 
 
 def log_data_func(data_sensors):
@@ -47,20 +47,24 @@ def log_data_func(data_sensors):
             file.write("\t".join(entry) + "\n")
 
 
-def run_queue(queue, log_data = True, refresh_time = 2):
+def run_queue(queue, interval = 3, log_interval = 2):
 
+    log_counter = 0
     while True:
 
+        log_counter += 1
         data_sensors = read_sensors()
         # readout queue until empty, since we only want the most current values in there
-        while not queue.empty():
-            queue.get()
-        queue.put(data_sensors)
+        if queue.empty():
+            queue.put(data_sensors)
 
-        if log_data:
+        if log_counter >= log_interval:
             log_data_func(data_sensors)
+            log_counter = 0
 
-        time.sleep(refresh_time)
+        time.sleep(interval)
 
 if __name__ == "__main__":
-    print("Here one can write some more code.")
+    while True:
+        print(read_sensors())
+        time.sleep(2)

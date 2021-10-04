@@ -77,7 +77,7 @@ class ADC:
 
         if verbose:
             self.get_gain()
-    
+
     def get_gain(self):
         """Print gain of ADC with voltage limits.
 
@@ -117,48 +117,43 @@ class ADC:
         return values
 
 
-class ADCS:
-    def __init__(self, adcs):
-        """Instanciate object.
+def log_data_func(data_adcs):
+    with open("Data/adcs.data", "a") as file:
+        current_time = time.localtime()
+        current_time = time.strftime("%H:%M:%S", current_time)
+        file.write(current_time + "\t" + "\t".join(data_adcs) + "\n")
 
-        Args:
-            adcs (list of ADC): List with ADC objects.
-        """
-        self.adcs = adcs
 
-    def get_channels(self, interval: float = 0):
-        """Read all channels of ADCs.
+def read_adcs(adcs, interval: float = 1, log_interval = 3):
+    unit_dic = {0: "# Bins", 1: "V", 2: "A"}
 
-        Args:
-            interval (float): Continous read with interval seconds between reads.
-        """
+    # header shown only once at top
+    header1 = [f"ADC {adc.device_address} [{unit_dic[adc.unit]}]" for adc in adcs]
+    # header with column names
+    header2 = []
+    for adc in adcs:
+        header2.extend([f"{adc.name} {i}" for i in range(1,5)])
 
-        log_data = True
+    width = 6
+    print(tp.header(header1, width = 4 * (width + 2) + 1))
+    print(tp.header(header2, width = width))
 
-        unit_dic = {0: "# Bins", 1: "V", 2: "A"}
+    log_counter = 0
 
-        # header shown only once at top
-        header1 = [f"ADC {adc.device_address} [{unit_dic[adc.unit]}]" for adc in self.adcs]
-        # header with column names
-        header2 = []
-        for adc in self.adcs:
-            header2.extend([f"{adc.name} {i}" for i in range(1,5)])
+    while True:
 
-        width = 6
-        print(tp.header(header1, width = 4 * (width + 2) + 1))
+        # print header again after every 10 rows
+        for i in range(10):
+            log_counter += 1
+            time.sleep(interval)
+            data_adcs = []
+            for adc in adcs:
+                data_adcs.extend(adc.get_channels())
+            data_adcs = np.round(np.array(data_adcs), 2)
+            data_adcs = [f"{value:.2f}" for value in data_adcs]
+            print(tp.row(data_adcs, width=width), flush=True)
+
+            if log_counter >= log_interval:
+                log_data_func(data_adcs)
+                log_counter = 0
         print(tp.header(header2, width = width))
-
-        while True:
-            # print header again after 10 rows
-            for i in range(10):
-                time.sleep(interval)
-                values = []
-                for adc in self.adcs:
-                    values.extend(adc.get_channels())
-                values = np.round(np.array(values), 2)
-                values = [f"{value:.2f}" for value in values]
-                print(tp.row(values, width=width), flush=True)
-                if log_data:
-                    with open("Data/adcs.data", "a") as file:
-                        file.write(" ".join(values) + "\n")
-            print(tp.header(header2, width = width))
